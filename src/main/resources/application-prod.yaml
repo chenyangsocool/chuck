@@ -1,0 +1,3 @@
+spring:
+  datasource:
+    url: jdbc:mysql://mysql-db-service:3306/truck

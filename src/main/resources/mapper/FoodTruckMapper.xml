@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.truck.mapper.FoodTruckMapper">
+
+    <insert id="insertWithLocation" parameterType="com.example.truck.entity.FoodTruck">
+        insert into food_truck (id,
+                                third_id,
+                                object_id,
+                                applicant,
+                                facility_type,
+                                cnn,
+                                address,
+                                permit,
+                                status,
+                                food_items,
+                                longitude,
+                                latitude,
+                                schedule,
+                                approved,
+                                received,
+                                prior_permit,
+                                expiration_date,
+                                human_address,
+                                block_lot,
+                                block,
+                                lot,
+                                x,
+                                y,
+                                location)
+        VALUES (#{id},
+                #{thirdId},
+                #{objectId},
+                #{applicant},
+                #{facilityType},
+                #{cnn},
+                #{address},
+                #{permit},
+                #{status},
+                #{foodItems},
+                #{longitude},
+                #{latitude},
+                #{schedule},
+                #{approved},
+                #{received},
+                #{priorPermit},
+                #{expirationDate},
+                #{humanAddress},
+                #{blockLot},
+                #{block},
+                #{lot},
+                #{x},
+                #{y},
+                ST_PointFromText(#{location}))
+    </insert>
+
+    <sql id="getPageSql">
+        select id,
+        third_id,
+        object_id,
+        applicant,
+        facility_type,
+        cnn,
+        address,
+        permit,
+        status,
+        food_items,
+        longitude,
+        latitude,
+        schedule,
+        approved,
+        received,
+        prior_permit,
+        expiration_date,
+        human_address,
+        block_lot,
+        block,
+        lot,
+        x,
+        y
+        <if test="filter.longitude != null and filter.latitude != null">
+            ,ST_Distance_Sphere(location, ST_PointFromText(CONCAT('POINT(', #{filter.longitude}, ' ', #{filter.latitude}, ')'))) as
+            distance
+        </if>
+        from food_truck
+    </sql>
+
+    <select id="getPage" resultType="com.example.truck.entity.FoodTruck">
+        <include refid="getPageSql"/>
+        <where>
+            <if test="filter.objectId != null">
+                and object_id = #{filter.objectId}
+            </if>
+            <if test="filter.facilityType != null">
+                and facility_type = #{filter.facilityType}
+            </if>
+            <if test="filter.cnn != null">
+                and cnn = #{filter.cnn}
+            </if>
+        </where>
+        <if test="filter.longitude != null and filter.latitude != null">
+            order by distance
+        </if>
+    </select>
+
+</mapper>

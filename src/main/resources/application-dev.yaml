@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    username: paro
+    password: paro
+    url: jdbc:mysql://localhost:3306/truck
