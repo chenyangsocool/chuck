@@ -1,0 +1,51 @@
+# create network
+networks:
+  young-network:
+    driver: bridge
+# create services
+services:
+  # mysql
+  mysql-db-service:
+    image: mysql:8.3
+    container_name: mysql-db-service
+    environment:
+      MYSQL_ROOT_PASSWORD: paro
+      MYSQL_DATABASE: truck
+      MYSQL_USER: paro
+      MYSQL_PASSWORD: paro
+    networks:
+      - young-network
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
+  # java
+  truck-service:
+    image: ccr.ccs.tencentyun.com/paro-dev/truck-api:1.0.0
+    container_name: truck-service
+    networks:
+      - young-network
+    ports:
+      - "6666:6666"
+    depends_on:
+      - mysql-db-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db-service:3306/truck
+      SPRING_DATASOURCE_USERNAME: paro
+      SPRING_DATASOURCE_PASSWORD: paro
+  # web
+  truck-web-service:
+    image: ccr.ccs.tencentyun.com/paro-dev/truck-web:1.0.0
+    container_name: truck-web-service
+    networks:
+      - young-network
+    ports:
+      - "8080:8080"
+    depends_on:
+      - truck-service
